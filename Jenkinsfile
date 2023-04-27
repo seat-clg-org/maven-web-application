@@ -1,0 +1,36 @@
+node{
+
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', 
+daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], 
+pipelineTriggers([pollSCM('* * * * *')])])
+
+def mavenHome = tool name: 'maven3.9.1'
+
+echo "The job name is: " ${JOB_NAME}
+echo "The Node name is: " ${NODE_NAME}
+echo "The Build Number is: " ${BUILD_NUMBER}
+echo "Jenkins Home path is: " ${JENKINS_HOME}
+
+stage('checkoutCode'){
+git branch: 'development', credentialsId: '134510de-0c0f-41e6-93fc-993f46b87a17', url: 'https://github.com/seat-clg-org/maven-web-application.git
+}
+stage('Build')
+{
+sh "${mavenHome}/bin/mvn clean package"
+}
+  /*
+stage('SonarQubeReport'){
+sh "${mavenHome}/bin/mvn clean sonar:sonar"
+}
+
+stage('UploadArtifactsIntoNexus'){
+sh "${mavenHome}/bin/mvn deploy"
+}
+
+stage{'DeployAppIntoTomcat'}{
+sshagent(['34549d37-a242-47cc-a04b-66207fba9bf1']) {
+    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.3.136:/opt/apache-tomcat-9.0.73/webapps/"
+}
+}
+*/
+}//node closing
