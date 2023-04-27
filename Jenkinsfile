@@ -19,21 +19,18 @@ stage('Build')
 {
 sh "${mavenHome}/bin/mvn clean package"
 }
-
-  /*
+ /*
 stage('SonarQubeReport'){
 sh "${mavenHome}/bin/mvn clean sonar:sonar"
 }
 
 stage('UploadArtifactsIntoNexus'){
-sh "${mavenHome}/bin/mvn clean deploy"
+sh "${mavenHome}/bin/mvn deploy"
 }
 
-stage('DeployAppIntoTomcat'){
-sshagent(['dd085870-ab36-4a86-9f5b-a915e179d45d']) {
-   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.40.86:/opt/apache-tomcat-9.0.73/webapps/"
-}
-}
+stage{'DeployAppIntoTomcat'}{
+sshagent(['34549d37-a242-47cc-a04b-66207fba9bf1']) {
+    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.3.136:/opt/apache-tomcat-9.0.73/webapps/"
 */
 
 }//node closing
