@@ -12,7 +12,7 @@ echo "The Build Number is: " ${BUILD_NUMBER}
 echo "Jenkins Home path is: " ${JENKINS_HOME}
 
 stage('checkoutCode'){
-git branch: 'development', credentialsId: '134510de-0c0f-41e6-93fc-993f46b87a17', url: 'https://github.com/seat-clg-org/maven-web-application.git
+  git branch: 'development', credentialsId: '134510de-0c0f-41e6-93fc-993f46b87a17', url: 'https://github.com/seat-clg-org/maven-web-application.git'
 }
 stage('Build')
 {
