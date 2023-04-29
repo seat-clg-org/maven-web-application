@@ -1,0 +1,102 @@
+pipeline{
+
+agent any
+
+parameters {
+  choice choices: ['master', 'development', 'stage', 'uat'], description: 'Select the Branch Name', name: 'BranchName'
+  string defaultValue: 'Mithun Software Soluations', name: 'PersonName'
+}
+
+tools{
+maven 'maven3.9.1'
+}
+
+options {
+  buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
+  timestamps()
+}
+
+triggers {
+  pollSCM('* * * * *')
+}
+
+//Checkout Code Stage
+stages{
+   stage('CheckoutCodeCode'){
+   steps{
+     sendSlackNotifications('STARTED')  
+   git branch: "${params.BranchName}", credentialsId: '134510de-0c0f-41e6-93fc-993f46b87a17', url: 'https://github.com/seat-clg-org/maven-web-application.git'
+   }
+   }
+//Build Stage   
+stage('Build'){
+steps{
+sh "mvn clean package"
+}
+}
+/*
+//Execute SonarQube Report
+stage('ExecuteSonarQubeReport'){
+steps{
+sh "mvn clean sonar:sonar"
+}
+}
+
+//UploadArtifactsIntoNexus
+stage('ArtifactsIntoNexus'){
+steps{
+sh "mvn clean deploy"
+}
+}
+
+//DeployApplication into Tomcat server
+stage('DeploApp'){
+steps{
+sshagent(['34549d37-a242-47cc-a04b-66207fba9bf1']) {
+    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.3.136:/opt/apache-tomcat-9.0.73/webapps/"
+}
+}
+}
+*/
+
+}//stage closing
+
+post {
+  success {
+    sendSlackNotifications(currentBuild.result) 
+  }
+  failure {
+    sendSlackNotifications(currentBuild.result)
+  }
+  
+}
+
+}//pipeline closing
+
+//Function for slack notifications
+def sendSlackNotifications(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    color = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESSFUL') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (color: colorCode, message: summary, channel: '#canarabank')
+}
+
